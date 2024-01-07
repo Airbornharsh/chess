@@ -1,0 +1,19 @@
+{
+  "name": "chess-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "yarn workspace server dev & yarn workspace web dev",
+    "web": "cd packages/web && yarn dev",
+    "server": "cd packages/server && yarn dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
