@@ -11,7 +11,11 @@
     "dev": "yarn workspace server dev & yarn workspace web dev",
     "web": "cd packages/web && yarn dev",
     "server": "cd packages/server && yarn dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "keywords": [],
   "author": "",
