@@ -1,15 +1,14 @@
 import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
+import connectDB from './config/DBConfig'
 
 const app = express()
 dotenv.config()
 
 app.use(cors())
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+connectDB()
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on port ${process.env.PORT}`)
