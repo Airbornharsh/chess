@@ -1,3 +1,4 @@
+import { LoginHandler, RegisterHandler } from '../controllers/AuthController'
 import { Router } from 'express'
 
 const AuthRouter = (router: Router) => {
@@ -8,6 +9,8 @@ const AuthRouter = (router: Router) => {
   auth.get('/', (req, res) => {
     res.send('Auth API!')
   })
+  auth.post('/login', LoginHandler)
+  auth.post('/register', RegisterHandler)
 }
 
 export default AuthRouter
