@@ -15,13 +15,17 @@ const PlayerSchema = new Schema({
     required: true,
     unique: false,
   },
+  phoneNumber: {
+    type: String,
+    default: '',
+  },
   avatar: {
     type: String,
-    required: true,
+    default: '',
   },
   bio: {
     type: String,
-    required: false,
+    default: '',
   },
   games: [
     {
