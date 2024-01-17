@@ -20,7 +20,9 @@ export const CreateGameHandler: RequestHandler = async (req, res) => {
     let inviteCode
 
     while (true) {
-      inviteCode = Math.ceil(Math.random() * 1000000)
+      inviteCode = Math.ceil(Math.random() * 1000000).toString()
+
+      if (inviteCode.length !== 6) continue
 
       const checkGameExists = await GameModel.findOne({ inviteCode })
 
@@ -160,11 +162,15 @@ export const MovePieceHandler: RequestHandler = async (req, res) => {
 
     if (!gameData) return res.status(404).json({ message: 'Game not found' })
 
-    const gameStateData = await GameStateModel.create({
+    await GameStateModel.create({
       index: gameData.latestGameStateIndex + 1,
       gameId: gameData._id,
       board: req.body.board,
     })
+
+    gameData.latestGameStateIndex += 1
+
+    await gameData.save()
 
     const docRef = firestore.collection('games').doc(gameData._id.toString())
 
@@ -180,5 +186,25 @@ export const MovePieceHandler: RequestHandler = async (req, res) => {
     })
   } catch (e) {
     console.log(e)
+  }
+}
+
+export const ExistsGameHandler: RequestHandler = async (req, res) => {
+  try {
+    const authPlayer = await res.locals.player
+
+    const userData = await PlayerModel.findOne({ uid: authPlayer.uid })
+
+    if (!userData) return res.status(401).json({ message: 'Unauthorized' })
+
+    const gameData = await GameModel.findOne({
+      $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+    })
+
+    if (!gameData) return res.status(404).json({ message: 'Not Found' })
+
+    return res.status(200).json(gameData)
+  } catch (e: any) {
+    res.status(500).send(e.message)
   }
 }

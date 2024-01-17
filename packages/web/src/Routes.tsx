@@ -12,7 +12,7 @@ const RoutesContainer = () => {
       {AuthCtx.user ? (
         <>
           <Route path="/" element={<Home />} />
-          <Route path="/game/:inviteCode" element={<Game />} />
+          <Route path="/game" element={<Game />} />
         </>
       ) : (
         <Route path="/" element={<Auth />} />

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { UserAuthContext } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import useGameContext from '../context/GameContext'
@@ -10,6 +10,32 @@ const Home = () => {
   const { user } = useContext(UserAuthContext)
   const { setGameData } = useGameContext()
   const Navigate = useNavigate()
+
+  useEffect(() => {
+    const onLoad = async () => {
+      try {
+        const token = await user?.getIdToken()
+
+        const res = await axios.get(
+          `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/exists`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+
+        console.log(res)
+        setGameData(res.data)
+        Navigate(`/game?invitecode=${res.data.inviteCode}`)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    onLoad()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   const createGame = async () => {
     try {
@@ -27,7 +53,7 @@ const Home = () => {
 
       console.log(res)
       setGameData(res.data)
-      Navigate(`/game/${res.data.inviteCode}`)
+      Navigate(`/game?invitecode=${res.data.inviteCode}`)
     } catch (e) {
       console.log(e)
     }
@@ -53,7 +79,7 @@ const Home = () => {
 
       console.log(res)
       setGameData(res.data)
-      Navigate(`/game/${inviteCode}`)
+      Navigate(`/game?invitecode=${inviteCode}`)
     } catch (e) {
       console.log(e)
     }

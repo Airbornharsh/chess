@@ -1,5 +1,6 @@
 import {
   CreateGameHandler,
+  ExistsGameHandler,
   GetGameHandler,
   JoinGameHandler,
   MovePieceHandler,
@@ -15,6 +16,7 @@ const GameRouter = (router: Router) => {
   game.post('/create', CreateGameHandler)
   game.post('/join', JoinGameHandler)
   game.post('/move', MovePieceHandler)
+  game.get('/exists', ExistsGameHandler)
 }
 
 export default GameRouter

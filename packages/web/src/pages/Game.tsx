@@ -40,7 +40,7 @@ const Game = () => {
         const token = await user?.getIdToken()
         const res = await axios.get(
           `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/${
-            location.pathname.split('/')[2]
+            location.search.split('?')[1].split('=')[1]
           }`,
           {
             headers: {
@@ -58,7 +58,7 @@ const Game = () => {
 
     onLoad()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, user])
+  }, [location.search, user])
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -109,114 +109,56 @@ const Game = () => {
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-10">
       <p>It's {turn} turn</p>
       <p>{message}</p>
-      <div className="flex gap-10">
-        {type === 'w' ? (
-          <div>
-            <p>white</p>
-            <div
-              className="flex border-2"
-              style={{
-                transform: 'rotate(-90deg)',
-              }}
-            >
-              {Object.keys(board).map((row) => {
-                return (
-                  <div key={`${row}`} className="flex flex-col">
-                    {board[row].map((column: string, ci: number) => {
-                      return (
-                        <BoardPiece
-                          key={`${row}${ci}`}
-                          type={'w'}
-                          turn={turn}
-                          piece={column}
-                          y={ci}
-                          x={parseInt(row)}
-                          selectedPiece={selectedPiece || null}
-                          setSelectedPieceFn={setSelectedPieceFn}
-                          active={checkActive(parseInt(row), ci)}
-                          killSuggestion={checkKillSuggestion(
-                            parseInt(row),
-                            ci,
-                          )}
-                          movePiece={() => {
-                            MovePiece(
-                              moveUpdate,
-                              turn,
-                              setTurn,
-                              board,
-                              setBoard,
-                              selectedPiece,
-                              active,
-                              killSuggestion,
-                              empty,
-                              getLocation,
-                              timerMessage,
-                              parseInt(row),
-                              ci,
-                            )
-                          }}
-                        />
-                      )
-                    })}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        ) : (
-          <div>
-            <p>Black</p>
-            <div
-              className="flex border-2"
-              style={{
-                transform: 'rotate(90deg)',
-              }}
-            >
-              {Object.keys(board).map((row) => {
-                return (
-                  <div key={`${row}`} className="flex flex-col">
-                    {board[row].map((column: string, ci: number) => {
-                      return (
-                        <BoardPiece
-                          key={`${row}${ci}`}
-                          type={'b'}
-                          turn={turn}
-                          piece={column}
-                          y={ci}
-                          x={parseInt(row)}
-                          selectedPiece={selectedPiece || null}
-                          setSelectedPieceFn={setSelectedPieceFn}
-                          active={checkActive(parseInt(row), ci)}
-                          killSuggestion={checkKillSuggestion(
-                            parseInt(row),
-                            ci,
-                          )}
-                          movePiece={() => {
-                            MovePiece(
-                              moveUpdate,
-                              turn,
-                              setTurn,
-                              board,
-                              setBoard,
-                              selectedPiece,
-                              active,
-                              killSuggestion,
-                              empty,
-                              getLocation,
-                              timerMessage,
-                              parseInt(row),
-                              ci,
-                            )
-                          }}
-                        />
-                      )
-                    })}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+      <p>Invite Code:{gameData?.inviteCode}</p>
+      <div className="flex flex-col gap-1">
+        <p>{type === 'w' ? 'White' : 'Black'}</p>
+        <div
+          className="flex border-2"
+          style={{
+            transform: type === 'w' ? 'rotate(-90deg)' : 'rotate(90deg)',
+          }}
+        >
+          {Object.keys(board).map((row) => {
+            return (
+              <div key={`${row}`} className="flex flex-col">
+                {board[row].map((column: string, ci: number) => {
+                  return (
+                    <BoardPiece
+                      key={`${row}${ci}`}
+                      type={type!}
+                      turn={turn}
+                      piece={column}
+                      y={ci}
+                      x={parseInt(row)}
+                      selectedPiece={selectedPiece || null}
+                      setSelectedPieceFn={setSelectedPieceFn}
+                      active={checkActive(parseInt(row), ci)}
+                      killSuggestion={checkKillSuggestion(parseInt(row), ci)}
+                      movePiece={() => {
+                        MovePiece(
+                          type!,
+                          moveUpdate,
+                          turn,
+                          setTurn,
+                          board,
+                          setBoard,
+                          selectedPiece,
+                          active,
+                          killSuggestion,
+                          empty,
+                          getLocation,
+                          timerMessage,
+                          parseInt(row),
+                          ci,
+                        )
+                      }}
+                    />
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

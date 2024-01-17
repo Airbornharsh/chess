@@ -1,6 +1,7 @@
 import { Board } from '../types/type'
 
 export const MovePiece = (
+  type: 'w' | 'b',
   moveUpdate: () => void,
   turn: 'w' | 'b',
   setTurn: (turn: 'w' | 'b') => void,
@@ -15,6 +16,8 @@ export const MovePiece = (
   x: number,
   y: number,
 ) => {
+  console.log(type, turn)
+  if (type !== turn) return
   if (!selectedPiece) return
   if (
     !active.find((a) => a.x === x && a.y === y) &&
