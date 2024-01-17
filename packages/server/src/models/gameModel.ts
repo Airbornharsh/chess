@@ -8,6 +8,15 @@ const GameSchema = new Schema({
       default: [],
     },
   ],
+  inviteCode: {
+    type: String,
+    required: true,
+  },
+  turn: {
+    type: String,
+    required: true,
+    default: 'white',
+  },
   winner: {
     type: Schema.Types.ObjectId,
     ref: 'Player',

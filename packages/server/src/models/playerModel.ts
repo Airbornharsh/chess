@@ -8,18 +8,24 @@ const PlayerSchema = new Schema({
   uid: {
     type: String,
     required: true,
+    unique: true,
   },
   email: {
     type: String,
     required: true,
+    unique: false,
+  },
+  phoneNumber: {
+    type: String,
+    default: '',
   },
   avatar: {
     type: String,
-    required: true,
+    default: '',
   },
   bio: {
     type: String,
-    required: false,
+    default: '',
   },
   games: [
     {
