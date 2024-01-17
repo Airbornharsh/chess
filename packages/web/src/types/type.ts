@@ -43,3 +43,31 @@ export type BoardPieceProps = {
   killSuggestion: boolean | undefined
   movePiece: (x: number, y: number) => void
 }
+
+export type GameData = {
+  _id: string
+  players: string[]
+  inviteCode: string
+  turn: 'white' | 'black'
+  winner: string | null
+  losser: string | null
+  whitePlayer: string
+  blackPlayer: string
+  moves: string[]
+  gameState: string[]
+  latestGamStateIndex: number
+  createdAt: string
+}
+
+export type Userdata = {
+  _id: string
+  email: string
+  username: string
+  uid: string
+  avatar: string
+  games: string[]
+  wins: string[]
+  loses: string[]
+  createdAt: string
+  updatedAt: string
+}

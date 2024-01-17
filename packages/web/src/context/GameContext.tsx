@@ -1,7 +1,20 @@
 import { createContext, useContext, useState } from 'react'
-import { ActivePiece, Board, PlayerColor, SelectedPiece } from '../types/type'
+import {
+  ActivePiece,
+  Board,
+  GameData,
+  PlayerColor,
+  SelectedPiece,
+} from '../types/type'
+import { UserAuthContext } from './AuthContext'
+import axios from 'axios'
 
 interface GameContextProps {
+  gameData: GameData | null
+  setGameData: (gameData: GameData) => void
+  moveUpdate: () => void
+  type: PlayerColor | null
+  setType: (color: PlayerColor) => void
   turn: PlayerColor
   setTurn: (color: PlayerColor) => void
   message: string
@@ -31,8 +44,10 @@ interface GameContextProviderProps {
 export const GameContextProvider: React.FC<GameContextProviderProps> = ({
   children,
 }) => {
-  const color = 'w'
-  const [turn, setTurn] = useState<PlayerColor>(color)
+  const { user, userData } = useContext(UserAuthContext)
+  const [gameData, setGameData] = useState<GameData | null>(null)
+  const [type, setType] = useState<PlayerColor | null>(null)
+  const [turn, setTurn] = useState<PlayerColor>('w')
   const [message, setMessage] = useState<string>('')
   const [moves, setMoves] = useState<string[]>([])
   const [board, setBoard] = useState<Board>({
@@ -48,6 +63,36 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
   const [selectedPiece, setSelectedPiece] = useState<SelectedPiece | null>()
   const [active, setActive] = useState<ActivePiece[]>([])
   const [killSuggestion, setKillSuggestion] = useState<ActivePiece[]>([])
+
+  const setGameDataFn = (gameData: GameData) => {
+    setType(gameData?.whitePlayer === userData?._id ? 'w' : 'b')
+    setGameData(gameData)
+  }
+
+  const moveUpdate = async () => {
+    try {
+      const token = await user?.getIdToken()
+      const res = await axios.post(
+        `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/move`,
+        {
+          board,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      console.log(res)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const setTypeFn = (color: PlayerColor) => {
+    setType(color)
+  }
 
   const getOther = (color: PlayerColor) => {
     if (color === 'w') return 'b'
@@ -121,6 +166,11 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
   return (
     <GameContext.Provider
       value={{
+        gameData,
+        setGameData: setGameDataFn,
+        moveUpdate,
+        type,
+        setType: setTypeFn,
         turn,
         setTurn: setTurnFn,
         message,

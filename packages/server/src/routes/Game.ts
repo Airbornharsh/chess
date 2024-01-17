@@ -1,3 +1,9 @@
+import {
+  CreateGameHandler,
+  GetGameHandler,
+  JoinGameHandler,
+  MovePieceHandler,
+} from '../controllers/GameController'
 import { Router } from 'express'
 
 const GameRouter = (router: Router) => {
@@ -5,9 +11,10 @@ const GameRouter = (router: Router) => {
 
   router.use('/game', game)
 
-  game.get('/', (req, res) => {
-    res.send('Game API!')
-  })
+  game.get('/:inviteCode', GetGameHandler)
+  game.post('/create', CreateGameHandler)
+  game.post('/join', JoinGameHandler)
+  game.post('/move', MovePieceHandler)
 }
 
 export default GameRouter

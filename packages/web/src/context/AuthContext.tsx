@@ -10,9 +10,12 @@ import {
   UserCredential,
 } from 'firebase/auth'
 import { auth } from '../config/firebase'
+import axios from 'axios'
+import { Userdata } from '../types/type'
 
 interface UserAuthContextProps {
   user: FirebaseUser | null
+  userData: Userdata | null
   logIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   logOut: () => Promise<void>
@@ -29,8 +32,7 @@ export const UserAuthContextProvider: React.FC<
   UserAuthContextProviderProps
 > = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null)
-
-  console.log(children)
+  const [userData, setUserData] = useState<Userdata | null>(null)
 
   const logIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password)
@@ -52,8 +54,24 @@ export const UserAuthContextProvider: React.FC<
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      try {
+        const token = await currentUser?.getIdToken()
+        const userRes = await axios.post(
+          `${import.meta.env.VITE_APP_BAKCEND_API_URL}auth/login`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+
+        setUserData(userRes.data)
+        setUser(currentUser)
+      } catch (e) {
+        console.log(e)
+      }
     })
 
     return () => {
@@ -63,7 +81,7 @@ export const UserAuthContextProvider: React.FC<
 
   return (
     <UserAuthContext.Provider
-      value={{ user, logIn, signUp, logOut, googleSignIn }}
+      value={{ user, userData, logIn, signUp, logOut, googleSignIn }}
     >
       {children}
     </UserAuthContext.Provider>

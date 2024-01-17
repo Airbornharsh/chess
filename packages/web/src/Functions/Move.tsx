@@ -1,6 +1,7 @@
 import { Board } from '../types/type'
 
 export const MovePiece = (
+  moveUpdate: () => void,
   turn: 'w' | 'b',
   setTurn: (turn: 'w' | 'b') => void,
   board: Board,
@@ -44,4 +45,5 @@ export const MovePiece = (
   setBoard(newBoard)
   empty()
   setTurn(turn === 'w' ? 'b' : 'w')
+  moveUpdate()
 }
