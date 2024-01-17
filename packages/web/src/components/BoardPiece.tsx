@@ -1,15 +1,4 @@
-type BoardPieceProps = {
-  type: 'w' | 'b'
-  turn: 'w' | 'b'
-  x: number
-  y: number
-  piece: string
-  selectedPiece: { x: number; y: number } | null
-  setSelectedPieceFn: (x: number, y: number) => void
-  active: boolean | undefined
-  killSuggestion: boolean | undefined
-  movePiece: (x: number, y: number) => void
-}
+import { BoardPieceProps } from '../types/type'
 
 const BoardPiece: React.FC<BoardPieceProps> = ({
   type,
@@ -24,8 +13,6 @@ const BoardPiece: React.FC<BoardPieceProps> = ({
   movePiece,
 }) => {
   if (selectedPiece) console.log(selectedPiece.x, selectedPiece.y)
-
-  console.log(turn, type)
 
   return (
     <span
