@@ -32,6 +32,8 @@ type ActivePiece = {
   y: number
 }
 
+type PlayerColor = 'w' | 'b'
+
 const getLocation = (x: number, y: number) => {
   if (y === 0) {
     return `a${x}`
@@ -52,9 +54,14 @@ const getLocation = (x: number, y: number) => {
   }
 }
 
+const getOther = (color: PlayerColor) => {
+  if (color === 'w') return 'b'
+  else return 'w'
+}
+
 const Home = () => {
   const color = 'w'
-  const [turn, setTurn] = useState<'w' | 'b'>(color)
+  const [turn, setTurn] = useState<PlayerColor>(color)
   const [message, setMessage] = useState<string>('')
   const [board, setBoard] = useState<Board>({
     8: ['br1', 'bh1', 'bb1', 'bk1', 'bq1', 'bb2', 'bh2', 'br2'],
@@ -91,9 +98,8 @@ const Home = () => {
     }
     const newBoard = { ...board }
     const piece = newBoard[`${selectedPiece?.x}`][selectedPiece?.y]
-    if (piece.split('')[1] === 'p') {
-      onPawnMove(newBoard, piece, x, y)
-    }
+    if (piece.split('')[1] === 'p') onPawnMove(newBoard, piece, x, y)
+    if (piece.split('')[1] === 'k') onKingMove(newBoard, piece, x, y)
     setBoard(newBoard)
     setSelectedPiece(null)
     setActive([])
@@ -112,71 +118,132 @@ const Home = () => {
     setSelectedPiece({ x, y })
     const piece = board[`${x}`][y]
     if (piece.split('')[1] === 'p') {
-      onPawnTap(piece, x, y)
-      onPawnTapKill(piece, x, y)
+      onPawnTap(x, y)
+      onPawnTapKill(x, y)
+    } else if (piece.split('')[1] === 'k') {
+      onKingTap(x, y)
+      onKingTapKill(x, y)
     }
   }
 
-  const onPawnTap = (piece: string, x: number, y: number) => {
+  const onPawnTap = (x: number, y: number) => {
     if (turn === 'w') {
       if (x == 2) {
-        if (board[`${x + 1}`][y]) {
-          return
-        }
+        if (board[`${x + 1}`][y]) return
         setActive((prev) => [...prev, { x: x + 1, y }])
-        if (board[`${x + 2}`][y]) {
-          return
-        }
+        if (board[`${x + 2}`][y]) return
         setActive((prev) => [...prev, { x: x + 2, y }])
       } else {
+        if (board[`${x + 1}`][y]) return
         setActive((prev) => [...prev, { x: x + 1, y }])
       }
     } else {
       if (x == 7) {
-        if (board[`${x - 1}`][y]) {
-          return
-        }
+        if (board[`${x - 1}`][y]) return
         setActive((prev) => [...prev, { x: x - 1, y }])
-        if (board[`${x - 2}`][y]) {
-          return
-        }
+        if (board[`${x - 2}`][y]) return
         setActive((prev) => [...prev, { x: x - 2, y }])
       } else {
+        if (board[`${x - 1}`][y]) return
         setActive((prev) => [...prev, { x: x - 1, y }])
       }
     }
   }
 
-  const onPawnTapKill = (piece: string, x: number, y: number) => {
+  const onPawnTapKill = (x: number, y: number) => {
     if (turn === 'w') {
-      if (board[`${x + 1}`][y + 1]?.split('')[0] === 'b') {
+      if (board[`${x + 1}`][y + 1]?.split('')[0] === 'b')
         setKillSuggestion((prev) => [...prev, { x: x + 1, y: y + 1 }])
-      }
-      if (board[`${x + 1}`][y - 1]?.split('')[0] === 'b') {
+      if (board[`${x + 1}`][y - 1]?.split('')[0] === 'b')
         setKillSuggestion((prev) => [...prev, { x: x + 1, y: y - 1 }])
-      }
     } else {
-      if (board[`${x - 1}`][y + 1]?.split('')[0] === 'w') {
+      if (board[`${x - 1}`][y + 1]?.split('')[0] === 'w')
         setKillSuggestion((prev) => [...prev, { x: x - 1, y: y + 1 }])
-      }
-      if (board[`${x - 1}`][y - 1]?.split('')[0] === 'w') {
+      if (board[`${x - 1}`][y - 1]?.split('')[0] === 'w')
         setKillSuggestion((prev) => [...prev, { x: x - 1, y: y - 1 }])
-      }
     }
   }
 
   const onPawnMove = (newBoard: Board, piece: string, x: number, y: number) => {
     if (!selectedPiece) return
-    if (active.find((a) => a.x === x && a.y === y)) {
+    if (active.find((a) => a.x === x && a.y === y))
       TimerMessage(
         `Moved from ${getLocation(
           selectedPiece.x,
           selectedPiece.y,
         )} to ${getLocation(x, y)}`,
       )
-    } else {
-      TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
-    }
+    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
+    newBoard[`${x}`][y] = piece
+  }
+
+  const onKingTap = (x: number, y: number) => {
+    if (`${x + 1}` in board && board[`${x + 1}`][y] === '')
+      setActive((prev) => [...prev, { x: x + 1, y }])
+    if (`${x - 1}` in board && board[`${x - 1}`][y] === '')
+      setActive((prev) => [...prev, { x: x - 1, y }])
+    if (board[`${x}`][y + 1] === '')
+      setActive((prev) => [...prev, { x, y: y + 1 }])
+    if (board[`${x}`][y - 1] === '')
+      setActive((prev) => [...prev, { x, y: y - 1 }])
+    if (`${x + 1}` in board && board[`${x + 1}`][y + 1] === '')
+      setActive((prev) => [...prev, { x: x + 1, y: y + 1 }])
+    if (`${x - 1}` in board && board[`${x - 1}`][y - 1] === '')
+      setActive((prev) => [...prev, { x: x - 1, y: y - 1 }])
+    if (`${x + 1}` in board && board[`${x + 1}`][y - 1] === '')
+      setActive((prev) => [...prev, { x: x + 1, y: y - 1 }])
+    if (`${x - 1}` in board && board[`${x - 1}`][y + 1] === '')
+      setActive((prev) => [...prev, { x: x - 1, y: y + 1 }])
+  }
+
+  const onKingTapKill = (x: number, y: number) => {
+    if (
+      `${x + 1}` in board &&
+      board[`${x + 1}`][y]?.split('')[0] === getOther(turn)
+    )
+      setKillSuggestion((prev) => [...prev, { x: x + 1, y }])
+    if (
+      `${x - 1}` in board &&
+      board[`${x - 1}`][y]?.split('')[0] === getOther(turn)
+    )
+      setKillSuggestion((prev) => [...prev, { x: x - 1, y }])
+    if (board[`${x}`][y + 1]?.split('')[0] === getOther(turn))
+      setKillSuggestion((prev) => [...prev, { x, y: y + 1 }])
+    if (board[`${x}`][y - 1]?.split('')[0] === getOther(turn))
+      setKillSuggestion((prev) => [...prev, { x, y: y - 1 }])
+    if (
+      `${x + 1}` in board &&
+      board[`${x + 1}`][y + 1]?.split('')[0] === getOther(turn)
+    )
+      setKillSuggestion((prev) => [...prev, { x: x + 1, y: y + 1 }])
+    if (
+      `${x - 1}` in board &&
+      board[`${x - 1}`][y - 1]?.split('')[0] === getOther(turn)
+    )
+      setKillSuggestion((prev) => [...prev, { x: x - 1, y: y - 1 }])
+    if (
+      `${x + 1}` in board &&
+      board[`${x + 1}`][y - 1]?.split('')[0] === getOther(turn)
+    )
+      setKillSuggestion((prev) => [...prev, { x: x + 1, y: y - 1 }])
+    if (
+      `${x - 1}` in board &&
+      board[`${x - 1}`][y + 1]?.split('')[0] === getOther(turn)
+    )
+      setKillSuggestion((prev) => [...prev, { x: x - 1, y: y + 1 }])
+  }
+
+  const onKingMove = (newBoard: Board, piece: string, x: number, y: number) => {
+    if (!selectedPiece) return
+    if (active.find((a) => a.x === x && a.y === y))
+      TimerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)}`,
+      )
+    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
     newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
     newBoard[`${x}`][y] = piece
   }
