@@ -1,5 +1,6 @@
 type BoardPieceProps = {
   type: 'w' | 'b'
+  turn: 'w' | 'b'
   x: number
   y: number
   piece: string
@@ -12,6 +13,7 @@ type BoardPieceProps = {
 
 const BoardPiece: React.FC<BoardPieceProps> = ({
   type,
+  turn,
   x,
   y,
   piece,
@@ -23,16 +25,30 @@ const BoardPiece: React.FC<BoardPieceProps> = ({
 }) => {
   if (selectedPiece) console.log(selectedPiece.x, selectedPiece.y)
 
+  console.log(turn, type)
+
   return (
     <span
       className="flex h-10 w-10 items-center justify-center"
       style={{
         backgroundColor: killSuggestion
-          ? 'red'
+          ? turn === type
+            ? 'red'
+            : (y + x) % 2 === 0
+              ? 'black'
+              : 'white'
           : active
-            ? 'green'
+            ? turn === type
+              ? 'green'
+              : (y + x) % 2 === 0
+                ? 'black'
+                : 'white'
             : selectedPiece?.x === x && selectedPiece?.y === y
-              ? 'gray'
+              ? turn === type
+                ? 'gray'
+                : (y + x) % 2 === 0
+                  ? 'black'
+                  : 'white'
               : (y + x) % 2 === 0
                 ? 'black'
                 : 'white',

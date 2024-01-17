@@ -63,6 +63,7 @@ const Home = () => {
   const color = 'w'
   const [turn, setTurn] = useState<PlayerColor>(color)
   const [message, setMessage] = useState<string>('')
+  const [moves, setMoves] = useState<string[]>([])
   const [board, setBoard] = useState<Board>({
     8: ['br1', 'bh1', 'bb1', 'bk1', 'bq1', 'bb2', 'bh2', 'br2'],
     7: ['bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8'],
@@ -79,13 +80,13 @@ const Home = () => {
 
   const TimerMessage = (message: string) => {
     setMessage(message)
+    setMoves((prev) => [...prev, message])
     setTimeout(() => {
       setMessage('')
     }, 1000)
   }
 
   const movePiece = (x: number, y: number) => {
-    console.log('Move Piece')
     if (!selectedPiece) return
     if (
       !active.find((a) => a.x === x && a.y === y) &&
@@ -98,11 +99,23 @@ const Home = () => {
     }
     const newBoard = { ...board }
     const piece = newBoard[`${selectedPiece?.x}`][selectedPiece?.y]
-    if (piece.split('')[1] === 'p') onPawnMove(newBoard, piece, x, y)
-    if (piece.split('')[1] === 'r') onRookMove(newBoard, piece, x, y)
-    if (piece.split('')[1] === 'b') onBishopMove(newBoard, piece, x, y)
-    if (piece.split('')[1] === 'q') onQueenMove(newBoard, piece, x, y)
-    if (piece.split('')[1] === 'k') onKingMove(newBoard, piece, x, y)
+    if (!selectedPiece) return
+    if (active.find((a) => a.x === x && a.y === y))
+      TimerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)}`,
+      )
+    else
+      TimerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)} and Killed ${newBoard[`${x}`][y]}`,
+      )
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
+    newBoard[`${x}`][y] = piece
     setBoard(newBoard)
     setSelectedPiece(null)
     setActive([])
@@ -111,10 +124,9 @@ const Home = () => {
   }
 
   const setSelectedPieceFn = (x: number, y: number) => {
-    console.log('Selected Piece')
     setActive([])
     setKillSuggestion([])
-    if (turn !== board[`${x}`][y].split('')[0]) {
+    if (turn !== board[`${x}`][y]?.split('')[0]) {
       TimerMessage('Not your turn')
       return
     }
@@ -127,6 +139,8 @@ const Home = () => {
       onRookTap(x, y)
     } else if (piece.split('')[1] === 'b') {
       onBishopTap(x, y)
+    } else if (piece.split('')[1] === 'h') {
+      onKnightTap(x, y)
     } else if (piece.split('')[1] === 'q') {
       onQueenTap(x, y)
     } else if (piece.split('')[1] === 'k') {
@@ -171,20 +185,6 @@ const Home = () => {
       if (board[`${x - 1}`][y - 1]?.split('')[0] === 'w')
         setKillSuggestion((prev) => [...prev, { x: x - 1, y: y - 1 }])
     }
-  }
-
-  const onPawnMove = (newBoard: Board, piece: string, x: number, y: number) => {
-    if (!selectedPiece) return
-    if (active.find((a) => a.x === x && a.y === y))
-      TimerMessage(
-        `Moved from ${getLocation(
-          selectedPiece.x,
-          selectedPiece.y,
-        )} to ${getLocation(x, y)}`,
-      )
-    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
-    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
-    newBoard[`${x}`][y] = piece
   }
 
   const onKingTap = (x: number, y: number) => {
@@ -243,42 +243,9 @@ const Home = () => {
       setKillSuggestion((prev) => [...prev, { x: x - 1, y: y + 1 }])
   }
 
-  const onKingMove = (newBoard: Board, piece: string, x: number, y: number) => {
-    if (!selectedPiece) return
-    if (active.find((a) => a.x === x && a.y === y))
-      TimerMessage(
-        `Moved from ${getLocation(
-          selectedPiece.x,
-          selectedPiece.y,
-        )} to ${getLocation(x, y)}`,
-      )
-    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
-    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
-    newBoard[`${x}`][y] = piece
-  }
-
   const onQueenTap = (x: number, y: number) => {
     onRookTap(x, y)
     onBishopTap(x, y)
-  }
-
-  const onQueenMove = (
-    newBoard: Board,
-    piece: string,
-    x: number,
-    y: number,
-  ) => {
-    if (!selectedPiece) return
-    if (active.find((a) => a.x === x && a.y === y))
-      TimerMessage(
-        `Moved from ${getLocation(
-          selectedPiece.x,
-          selectedPiece.y,
-        )} to ${getLocation(x, y)}`,
-      )
-    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
-    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
-    newBoard[`${x}`][y] = piece
   }
 
   const onRookTap = (x: number, y: number) => {
@@ -287,7 +254,7 @@ const Home = () => {
         setActive((prev) => [...prev, { x: i, y }])
       else if (
         `${i}` in board &&
-        board[`${i}`][y].split('')[0] === getOther(turn)
+        board[`${i}`][y]?.split('')[0] === getOther(turn)
       ) {
         setKillSuggestion((prev) => [...prev, { x: i, y }])
         break
@@ -298,7 +265,7 @@ const Home = () => {
         setActive((prev) => [...prev, { x: i, y }])
       else if (
         `${i}` in board &&
-        board[`${i}`][y].split('')[0] === getOther(turn)
+        board[`${i}`][y]?.split('')[0] === getOther(turn)
       ) {
         setKillSuggestion((prev) => [...prev, { x: i, y }])
         break
@@ -309,7 +276,7 @@ const Home = () => {
       if (board[`${x}`][i] === '') setActive((prev) => [...prev, { x, y: i }])
       else if (
         `${x}` in board &&
-        board[`${x}`][i].split('')[0] === getOther(turn)
+        board[`${x}`][i]?.split('')[0] === getOther(turn)
       ) {
         setKillSuggestion((prev) => [...prev, { x, y: i }])
         break
@@ -317,25 +284,11 @@ const Home = () => {
     }
     for (let i = y - 1; i >= 0; i--) {
       if (board[`${x}`][i] === '') setActive((prev) => [...prev, { x, y: i }])
-      else if (board[`${x}`][i].split('')[0] === getOther(turn)) {
+      else if (board[`${x}`][i]?.split('')[0] === getOther(turn)) {
         setKillSuggestion((prev) => [...prev, { x, y: i }])
         break
       } else break
     }
-  }
-
-  const onRookMove = (newBoard: Board, piece: string, x: number, y: number) => {
-    if (!selectedPiece) return
-    if (active.find((a) => a.x === x && a.y === y))
-      TimerMessage(
-        `Moved from ${getLocation(
-          selectedPiece.x,
-          selectedPiece.y,
-        )} to ${getLocation(x, y)}`,
-      )
-    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
-    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
-    newBoard[`${x}`][y] = piece
   }
 
   const onBishopTap = (x: number, y: number) => {
@@ -385,23 +338,70 @@ const Home = () => {
     }
   }
 
-  const onBishopMove = (
-    newBoard: Board,
-    piece: string,
-    x: number,
-    y: number,
-  ) => {
-    if (!selectedPiece) return
-    if (active.find((a) => a.x === x && a.y === y))
-      TimerMessage(
-        `Moved from ${getLocation(
-          selectedPiece.x,
-          selectedPiece.y,
-        )} to ${getLocation(x, y)}`,
-      )
-    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
-    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
-    newBoard[`${x}`][y] = piece
+  const onKnightTap = (x: number, y: number) => {
+    if (`${x + 2}` in board) {
+      if (board[`${x + 2}`][y + 1] === '') {
+        setActive((prev) => [...prev, { x: x + 2, y: y + 1 }])
+      } else if (board[`${x + 2}`][y + 1]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x + 2, y: y + 1 }])
+      }
+    }
+
+    if (`${x + 2}` in board) {
+      if (board[`${x + 2}`][y - 1] === '') {
+        setActive((prev) => [...prev, { x: x + 2, y: y - 1 }])
+      } else if (board[`${x + 2}`][y - 1]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x + 2, y: y - 1 }])
+      }
+    }
+
+    if (`${x - 2}` in board) {
+      if (board[`${x - 2}`][y + 1] === '') {
+        setActive((prev) => [...prev, { x: x - 2, y: y + 1 }])
+      } else if (board[`${x - 2}`][y + 1]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x - 2, y: y + 1 }])
+      }
+    }
+
+    if (`${x - 2}` in board) {
+      if (board[`${x - 2}`][y - 1] === '') {
+        setActive((prev) => [...prev, { x: x - 2, y: y - 1 }])
+      } else if (board[`${x - 2}`][y - 1]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x - 2, y: y - 1 }])
+      }
+    }
+
+    if (`${x + 1}` in board) {
+      if (board[`${x + 1}`][y + 2] === '') {
+        setActive((prev) => [...prev, { x: x + 1, y: y + 2 }])
+      } else if (board[`${x + 1}`][y + 2]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x + 1, y: y + 2 }])
+      }
+    }
+
+    if (`${x + 1}` in board) {
+      if (board[`${x + 1}`][y - 2] === '') {
+        setActive((prev) => [...prev, { x: x + 1, y: y - 2 }])
+      } else if (board[`${x + 1}`][y - 2]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x + 1, y: y - 2 }])
+      }
+    }
+
+    if (`${x - 1}` in board) {
+      if (board[`${x - 1}`][y + 2] === '') {
+        setActive((prev) => [...prev, { x: x - 1, y: y + 2 }])
+      } else if (board[`${x - 1}`][y + 2]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x - 1, y: y + 2 }])
+      }
+    }
+
+    if (`${x - 1}` in board) {
+      if (board[`${x - 1}`][y - 2] === '') {
+        setActive((prev) => [...prev, { x: x - 1, y: y - 2 }])
+      } else if (board[`${x - 1}`][y - 2]?.split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x: x - 1, y: y - 2 }])
+      }
+    }
   }
 
   const checkActive = (x: number, y: number) => {
@@ -435,6 +435,7 @@ const Home = () => {
                       <BoardPiece
                         key={`${row}${ci}`}
                         type={'w'}
+                        turn={turn}
                         piece={column}
                         y={ci}
                         x={parseInt(row)}
@@ -452,6 +453,11 @@ const Home = () => {
           </div>
         </div>
         <div>
+          {moves.map((move, i) => {
+            return <p key={i}>{move}</p>
+          })}
+        </div>
+        <div>
           <p>Black</p>
           <div
             className="flex border-2"
@@ -467,6 +473,7 @@ const Home = () => {
                       <BoardPiece
                         key={`${row}${ci}`}
                         type={'b'}
+                        turn={turn}
                         piece={column}
                         y={ci}
                         x={parseInt(row)}
