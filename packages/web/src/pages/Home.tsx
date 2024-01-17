@@ -70,7 +70,7 @@ const Home = () => {
     5: ['', '', '', '', '', '', '', ''],
     4: ['', '', '', '', '', '', '', ''],
     3: ['', '', '', '', '', '', '', ''],
-    2: ['wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8'],
+    2: ['', '', '', '', '', '', '', ''],
     1: ['wr1', 'wh1', 'wb1', 'wk1', 'wq1', 'wb2', 'wh2', 'wr2'],
   })
   const [selectedPiece, setSelectedPiece] = useState<SelectedPiece | null>()
@@ -99,6 +99,9 @@ const Home = () => {
     const newBoard = { ...board }
     const piece = newBoard[`${selectedPiece?.x}`][selectedPiece?.y]
     if (piece.split('')[1] === 'p') onPawnMove(newBoard, piece, x, y)
+    if (piece.split('')[1] === 'r') onRookMove(newBoard, piece, x, y)
+    if (piece.split('')[1] === 'b') onBishopMove(newBoard, piece, x, y)
+    if (piece.split('')[1] === 'q') onQueenMove(newBoard, piece, x, y)
     if (piece.split('')[1] === 'k') onKingMove(newBoard, piece, x, y)
     setBoard(newBoard)
     setSelectedPiece(null)
@@ -120,6 +123,12 @@ const Home = () => {
     if (piece.split('')[1] === 'p') {
       onPawnTap(x, y)
       onPawnTapKill(x, y)
+    } else if (piece.split('')[1] === 'r') {
+      onRookTap(x, y)
+    } else if (piece.split('')[1] === 'b') {
+      onBishopTap(x, y)
+    } else if (piece.split('')[1] === 'q') {
+      onQueenTap(x, y)
     } else if (piece.split('')[1] === 'k') {
       onKingTap(x, y)
       onKingTapKill(x, y)
@@ -235,6 +244,153 @@ const Home = () => {
   }
 
   const onKingMove = (newBoard: Board, piece: string, x: number, y: number) => {
+    if (!selectedPiece) return
+    if (active.find((a) => a.x === x && a.y === y))
+      TimerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)}`,
+      )
+    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
+    newBoard[`${x}`][y] = piece
+  }
+
+  const onQueenTap = (x: number, y: number) => {
+    onRookTap(x, y)
+    onBishopTap(x, y)
+  }
+
+  const onQueenMove = (
+    newBoard: Board,
+    piece: string,
+    x: number,
+    y: number,
+  ) => {
+    if (!selectedPiece) return
+    if (active.find((a) => a.x === x && a.y === y))
+      TimerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)}`,
+      )
+    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
+    newBoard[`${x}`][y] = piece
+  }
+
+  const onRookTap = (x: number, y: number) => {
+    for (let i = x + 1; i <= 8; i++) {
+      if (`${i}` in board && board[`${i}`][y] === '')
+        setActive((prev) => [...prev, { x: i, y }])
+      else if (
+        `${i}` in board &&
+        board[`${i}`][y].split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x: i, y }])
+        break
+      } else break
+    }
+    for (let i = x - 1; i >= 0; i--) {
+      if (`${i}` in board && board[`${i}`][y] === '')
+        setActive((prev) => [...prev, { x: i, y }])
+      else if (
+        `${i}` in board &&
+        board[`${i}`][y].split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x: i, y }])
+        break
+      } else break
+    }
+    for (let i = y + 1; i < 8; i++) {
+      console.log(`${x}${y}${i}`)
+      if (board[`${x}`][i] === '') setActive((prev) => [...prev, { x, y: i }])
+      else if (
+        `${x}` in board &&
+        board[`${x}`][i].split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x, y: i }])
+        break
+      } else break
+    }
+    for (let i = y - 1; i >= 0; i--) {
+      if (board[`${x}`][i] === '') setActive((prev) => [...prev, { x, y: i }])
+      else if (board[`${x}`][i].split('')[0] === getOther(turn)) {
+        setKillSuggestion((prev) => [...prev, { x, y: i }])
+        break
+      } else break
+    }
+  }
+
+  const onRookMove = (newBoard: Board, piece: string, x: number, y: number) => {
+    if (!selectedPiece) return
+    if (active.find((a) => a.x === x && a.y === y))
+      TimerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)}`,
+      )
+    else TimerMessage(`Killed ${newBoard[`${x}`][y]}`)
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
+    newBoard[`${x}`][y] = piece
+  }
+
+  const onBishopTap = (x: number, y: number) => {
+    for (let i = x + 1, j = y + 1; i < 8 && j < 8; i++, j++) {
+      if (`${i}` in board && board[`${i}`][j] === '')
+        setActive((prev) => [...prev, { x: i, y: j }])
+      else if (
+        `${i}` in board &&
+        board[`${i}`][j]?.split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x: i, y: j }])
+        break
+      } else break
+    }
+    for (let i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--) {
+      if (`${i}` in board && board[`${i}`][j] === '')
+        setActive((prev) => [...prev, { x: i, y: j }])
+      else if (
+        `${i}` in board &&
+        board[`${i}`][j]?.split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x: i, y: j }])
+        break
+      } else break
+    }
+    for (let i = x + 1, j = y - 1; i <= 8 && j >= 0; i++, j--) {
+      if (`${i}` in board && board[`${i}`][j] === '')
+        setActive((prev) => [...prev, { x: i, y: j }])
+      else if (
+        `${i}` in board &&
+        board[`${i}`][j]?.split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x: i, y: j }])
+        break
+      } else break
+    }
+    for (let i = x - 1, j = y + 1; i >= 0 && j < 8; i--, j++) {
+      if (`${i}` in board && board[`${i}`][j] === '')
+        setActive((prev) => [...prev, { x: i, y: j }])
+      else if (
+        `${i}` in board &&
+        board[`${i}`][j]?.split('')[0] === getOther(turn)
+      ) {
+        setKillSuggestion((prev) => [...prev, { x: i, y: j }])
+        break
+      } else break
+    }
+  }
+
+  const onBishopMove = (
+    newBoard: Board,
+    piece: string,
+    x: number,
+    y: number,
+  ) => {
     if (!selectedPiece) return
     if (active.find((a) => a.x === x && a.y === y))
       TimerMessage(
