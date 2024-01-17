@@ -4,13 +4,14 @@ import onTap from '../Functions/Tap'
 import BoardPiece from '../components/BoardPiece'
 import useGameContext from '../context/GameContext'
 import axios from 'axios'
-import { useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { UserAuthContext } from '../context/AuthContext'
 import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 const Game = () => {
   const location = useLocation()
+  const Navigate = useNavigate()
   const { user } = useContext(UserAuthContext)
   const {
     gameData,
@@ -52,6 +53,7 @@ const Game = () => {
         console.log(res)
         setGameData(res.data)
       } catch (e) {
+        Navigate('/')
         console.log(e)
       }
     }
@@ -105,12 +107,34 @@ const Game = () => {
     return false
   }
 
+  const cancelGame = async () => {
+    try {
+      const token = await user?.getIdToken()
+      const res = await axios.post(
+        `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/cancel`,
+        {
+          inviteCode: gameData?.inviteCode,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      console.log(res)
+      setGameData(res.data)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-10">
       <p>It's {turn} turn</p>
       <p>{message}</p>
       <p>Invite Code:{gameData?.inviteCode}</p>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col items-center gap-2">
         <p>{type === 'w' ? 'White' : 'Black'}</p>
         <div
           className="flex border-2"
@@ -159,6 +183,9 @@ const Game = () => {
             )
           })}
         </div>
+        <button className="w-20 bg-gray-600 px-3 py-2" onClick={cancelGame}>
+          Cancel
+        </button>
       </div>
     </div>
   )

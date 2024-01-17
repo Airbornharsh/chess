@@ -93,12 +93,14 @@ export const JoinGameHandler: RequestHandler = async (req, res) => {
 
     const gameData = await GameModel.findOne({
       inviteCode: req.body.inviteCode,
+      winner: null,
+      losser: null,
     })
 
     if (!gameData) return res.status(404).json({ message: 'Game not found' })
 
     if (gameData.players.includes(userData._id)) {
-      return res.status(409).json({ gameData })
+      return res.status(201).json({ gameData })
     }
 
     await GameModel.findByIdAndUpdate(gameData._id, {
@@ -138,6 +140,8 @@ export const GetGameHandler: RequestHandler = async (req, res) => {
     const gameData = await GameModel.findOne({
       inviteCode,
       $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+      winner: null,
+      losser: null,
     })
 
     if (!gameData) return res.status(404).json({ message: 'Game not found' })
@@ -158,6 +162,8 @@ export const MovePieceHandler: RequestHandler = async (req, res) => {
 
     const gameData = await GameModel.findOne({
       $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+      winner: null,
+      losser: null,
     })
 
     if (!gameData) return res.status(404).json({ message: 'Game not found' })
@@ -199,11 +205,49 @@ export const ExistsGameHandler: RequestHandler = async (req, res) => {
 
     const gameData = await GameModel.findOne({
       $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+      winner: null,
+      losser: null,
     })
 
     if (!gameData) return res.status(404).json({ message: 'Not Found' })
 
     return res.status(200).json(gameData)
+  } catch (e: any) {
+    res.status(500).send(e.message)
+  }
+}
+
+export const CancelGameHandler: RequestHandler = async (req, res) => {
+  try {
+    const authPlayer = await res.locals.player
+
+    const userData = await PlayerModel.findOne({ uid: authPlayer.uid })
+
+    if (!userData) return res.status(401).json({ message: 'Unauthorized' })
+
+    const gameData = await GameModel.findOne({
+      $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+    })
+
+    if (!gameData) return res.status(404).json({ message: 'Not Found' })
+
+    gameData.losser = userData._id
+    gameData.winner = gameData.players.filter(
+      (player) => player.toString() !== userData._id.toString(),
+    )[0]
+    await gameData.save()
+
+    await firestore.collection('games').doc(gameData._id.toString()).delete()
+
+    await PlayerModel.findByIdAndUpdate(userData._id, {
+      $addToSet: { loses: gameData._id },
+    })
+
+    await PlayerModel.findByIdAndUpdate(gameData.winner, {
+      $addToSet: { wins: gameData._id },
+    })
+
+    return res.status(200).json({ message: 'success' })
   } catch (e: any) {
     res.status(500).send(e.message)
   }

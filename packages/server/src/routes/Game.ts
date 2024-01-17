@@ -1,4 +1,5 @@
 import {
+  CancelGameHandler,
   CreateGameHandler,
   ExistsGameHandler,
   GetGameHandler,
@@ -12,11 +13,12 @@ const GameRouter = (router: Router) => {
 
   router.use('/game', game)
 
-  game.get('/:inviteCode', GetGameHandler)
   game.post('/create', CreateGameHandler)
   game.post('/join', JoinGameHandler)
   game.post('/move', MovePieceHandler)
   game.get('/exists', ExistsGameHandler)
+  game.post('/cancel', CancelGameHandler)
+  game.get('/:inviteCode', GetGameHandler)
 }
 
 export default GameRouter
