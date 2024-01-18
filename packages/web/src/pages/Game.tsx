@@ -45,6 +45,15 @@ const Game = () => {
   const [opponent, setOpponent] = useState<string>('')
 
   useEffect(() => {
+    if (user === null) {
+      Navigate(
+        `/auth?invitecode=${location.search.split('?')[1].split('=')[1]}`,
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  useEffect(() => {
     const onLoad = async () => {
       try {
         const token = await user?.getIdToken()

@@ -2,8 +2,11 @@ import { FcGoogle } from 'react-icons/fc'
 import { auth } from '../config/firebase'
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import axios from 'axios'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const Auth = () => {
+  const Navigate = useNavigate()
+  const location = useLocation()
   const onGoogleLogin = async () => {
     try {
       const gooleProvider = new GoogleAuthProvider()
@@ -22,6 +25,11 @@ const Auth = () => {
       )
 
       console.log(res)
+      if (!location.search) Navigate('/')
+      if (location.search.split('?')[1].split('=')[0] !== 'invitecode')
+        Navigate('/')
+      const invitecode = location.search.split('?')[1].split('=')[1]
+      if (invitecode) Navigate(`/game?invitecode=${invitecode}}`)
     } catch (e) {
       console.log(e)
     } finally {
