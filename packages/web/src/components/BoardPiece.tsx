@@ -12,8 +12,6 @@ const BoardPiece: React.FC<BoardPieceProps> = ({
   killSuggestion,
   movePiece,
 }) => {
-  if (selectedPiece) console.log(selectedPiece.x, selectedPiece.y)
-
   return (
     <span
       className="flex h-10 w-10 items-center justify-center"

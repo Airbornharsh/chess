@@ -1,4 +1,5 @@
 import { Board } from '../types/type'
+// import Check from './Check'
 
 export const MovePiece = async (
   type: 'w' | 'b',
@@ -63,5 +64,6 @@ export const MovePiece = async (
           selectedPiece.y,
         )} to ${getLocation(x, y)} and Killed ${newBoard[`${x}`][y]}`,
       )
+    // Check(turn, newBoard, setActive, setKillSuggestion)
   }
 }

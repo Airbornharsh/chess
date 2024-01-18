@@ -8,6 +8,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { UserAuthContext } from '../context/AuthContext'
 import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '../config/firebase'
+import Check from '../Functions/Check'
 
 const Game = () => {
   const location = useLocation()
@@ -36,6 +37,8 @@ const Game = () => {
     reset,
     isFull,
     setIsFull,
+    setCheck,
+    setCheckMate,
   } = useGameContext()
   const [opponent, setOpponent] = useState<string>('')
 
@@ -84,6 +87,21 @@ const Game = () => {
               }
               if (data.whitePlayer !== '' && data.blackPlayer !== '')
                 setIsFull(true)
+              const res = Check(type, board)
+              if (res.check && !res.checkMate) {
+                timerMessage('Check', false)
+                setCheck(true)
+              } else {
+                timerMessage('', true)
+                setCheck(false)
+              }
+              if (res.checkMate) {
+                timerMessage('CheckMate', false)
+                setCheckMate(true)
+              } else {
+                timerMessage('', true)
+                setCheckMate(false)
+              }
             }
           })
         })

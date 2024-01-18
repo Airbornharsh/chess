@@ -71,3 +71,32 @@ export type Userdata = {
   createdAt: string
   updatedAt: string
 }
+
+export const PiecesIcons = {
+  w: {
+    pawn: '♙',
+    rook: '♖',
+    knight: '♘',
+    bishop: '♗',
+    queen: '♕',
+    king: '♔',
+  },
+  b: {
+    pawn: '♟︎',
+    rook: '♜',
+    knight: '♞',
+    bishop: '♝',
+    queen: '♛',
+    king: '♚',
+  },
+}
+
+export type CheckPieces = {
+  [key: string]: string[]
+  p: string[]
+  r: string[]
+  h: string[]
+  b: string[]
+  q: string[]
+  k: string[]
+}

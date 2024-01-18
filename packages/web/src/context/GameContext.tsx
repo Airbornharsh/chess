@@ -32,10 +32,14 @@ interface GameContextProps {
   getOther: (color: PlayerColor) => PlayerColor
   empty: () => void
   getLocation: (x: number, y: number) => string
-  timerMessage: (message: string) => void
+  timerMessage: (message: string, time?: boolean) => void
   reset: () => void
   isFull: boolean
   setIsFull: (isFull: boolean) => void
+  check: boolean
+  setCheck: (check: boolean) => void
+  checkMate: boolean
+  setCheckMate: (checkMate: boolean) => void
 }
 
 export const GameContext = createContext<GameContextProps>(null!)
@@ -67,9 +71,10 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
   const [active, setActive] = useState<ActivePiece[]>([])
   const [killSuggestion, setKillSuggestion] = useState<ActivePiece[]>([])
   const [isFull, setIsFull] = useState<boolean>(false)
+  const [check, setCheck] = useState<boolean>(false)
+  const [checkMate, setCheckMate] = useState<boolean>(false)
 
   const setGameDataFn = (gameData: GameData) => {
-    console.log(gameData?.whitePlayer)
     setType(gameData?.whitePlayer === userData?._id ? 'w' : 'b')
     setGameData(gameData)
   }
@@ -164,12 +169,22 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
     }
   }
 
-  const timerMessage = (message: string) => {
+  const timerMessage = (message: string, time = true) => {
     setMessage(message)
     setMovesFn(message)
-    setTimeout(() => {
-      setMessage('')
-    }, 1000)
+    if (time) {
+      setTimeout(() => {
+        setMessage('')
+      }, 2000)
+    }
+  }
+
+  const setCheckFn = (check: boolean) => {
+    setCheck(check)
+  }
+
+  const setCheckMateFn = (checkMate: boolean) => {
+    setCheckMate(checkMate)
   }
 
   const reset = () => {
@@ -226,6 +241,10 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
         reset: reset,
         isFull,
         setIsFull: isFullFn,
+        check,
+        setCheck: setCheckFn,
+        checkMate,
+        setCheckMate: setCheckMateFn,
       }}
     >
       {children}
