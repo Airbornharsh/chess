@@ -215,12 +215,13 @@ export const onBishopTap = (
   x: number,
   y: number,
 ) => {
-  for (let i = x + 1, j = y + 1; i < 8 && j < 8; i++, j++) {
+  for (let i = x + 1, j = y + 1; i <= 8 && j < 8; i++, j++) {
     if (`${i}` in board && board[`${i}`][j] === '') setActive({ x: i, y: j })
     else if (
       `${i}` in board &&
       board[`${i}`][j]?.split('')[0] === getOther(turn)
     ) {
+      console.log(i, j)
       setKillSuggestion({ x: i, y: j })
       break
     } else break
