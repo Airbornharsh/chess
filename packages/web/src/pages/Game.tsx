@@ -159,10 +159,9 @@ const Game = () => {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-10">
-      <p>It's {turn} turn</p>
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-5">
+      <p>{turn === 'w' ? 'White' : 'Black'} turn</p>
       <p>{message}</p>
-      <p>Me vs {opponent}</p>
       {!isFull && (
         <div className="flex items-center justify-center gap-3">
           <p>Invite Code:{gameData?.inviteCode}</p>
@@ -177,7 +176,8 @@ const Game = () => {
         </div>
       )}
       <div className="flex flex-col items-center gap-2">
-        <p>{type === 'w' ? 'White' : 'Black'}</p>
+        {/* <p>{type === 'w' ? 'White' : 'Black'}</p> */}
+        <p>{opponent}</p>
         <div
           className="flex border-2"
           style={{
@@ -225,7 +225,11 @@ const Game = () => {
             )
           })}
         </div>
-        <button className="w-20 bg-gray-600 px-3 py-2" onClick={cancelGame}>
+        <p>ME</p>
+        <button
+          className="mt-6 w-20 bg-gray-600 px-3 py-2"
+          onClick={cancelGame}
+        >
           Cancel
         </button>
       </div>
