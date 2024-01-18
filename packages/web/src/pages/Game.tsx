@@ -37,7 +37,9 @@ const Game = () => {
     reset,
     isFull,
     setIsFull,
+    check,
     setCheck,
+    checkMate,
     setCheckMate,
   } = useGameContext()
   const [opponent, setOpponent] = useState<string>('')
@@ -98,10 +100,8 @@ const Game = () => {
                 setIsFull(true)
               const res = Check(type, data.board)
               if (res.check && !res.checkMate) {
-                timerMessage('Check', false)
                 setCheck(true)
               } else if (res.checkMate) {
-                timerMessage('CheckMate', false)
                 setCheckMate(true)
               } else {
                 timerMessage('', true)
@@ -167,6 +167,8 @@ const Game = () => {
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-5">
       <p>{turn === 'w' ? 'White' : 'Black'} turn</p>
+      <p>{check ? 'Check' : ''}</p>
+      <p>{checkMate ? 'CheckMate' : ''}</p>
       <p>{message}</p>
       {!isFull && (
         <div className="flex items-center justify-center gap-3">

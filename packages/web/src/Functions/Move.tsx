@@ -48,7 +48,6 @@ export const MovePiece = async (
     setTurn(tempTurn)
     return
   } else if (tempCheck.checkMate) {
-    timerMessage('Check Mate')
     newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = piece
     newBoard[`${x}`][y] = killedPiece
     setBoard(newBoard)

@@ -38,6 +38,7 @@ export const CreateGameHandler: RequestHandler = async (req, res) => {
       inviteCode,
       moves: [],
       latestGameStateIndex: 0,
+      blackPlayerName: '',
     })
 
     await PlayerModel.findByIdAndUpdate(userData._id, {
