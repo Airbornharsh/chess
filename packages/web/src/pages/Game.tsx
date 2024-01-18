@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { MovePiece } from '../Functions/Move'
 import onTap from '../Functions/Tap'
 import BoardPiece from '../components/BoardPiece'
@@ -12,7 +12,7 @@ import { db } from '../config/firebase'
 const Game = () => {
   const location = useLocation()
   const Navigate = useNavigate()
-  const { user } = useContext(UserAuthContext)
+  const { user, userData } = useContext(UserAuthContext)
   const {
     gameData,
     setGameData,
@@ -34,7 +34,10 @@ const Game = () => {
     empty,
     timerMessage,
     reset,
+    isFull,
+    setIsFull,
   } = useGameContext()
+  const [opponent, setOpponent] = useState<string>('')
 
   useEffect(() => {
     const onLoad = async () => {
@@ -52,7 +55,6 @@ const Game = () => {
           },
         )
 
-        console.log(res)
         setGameData(res.data)
       } catch (e) {
         Navigate('/')
@@ -72,9 +74,16 @@ const Game = () => {
         const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
           QuerySnapshot.forEach((doc) => {
             if (doc.id === gameData?._id) {
-              console.log(doc.data())
-              setBoard(doc.data().board)
-              setTurn(doc.data().turn === 'white' ? 'w' : 'b')
+              const data = doc.data()
+              setBoard(data.board)
+              setTurn(data.turn === 'white' ? 'w' : 'b')
+              if (data.whitePlayer === userData?._id) {
+                setOpponent(data.blackPlayerName)
+              } else {
+                setOpponent(data.whitePlayerName)
+              }
+              if (data.whitePlayer !== '' && data.blackPlayer !== '')
+                setIsFull(true)
             }
           })
         })
@@ -112,7 +121,7 @@ const Game = () => {
   const cancelGame = async () => {
     try {
       const token = await user?.getIdToken()
-      const res = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/cancel`,
         {
           inviteCode: gameData?.inviteCode,
@@ -124,8 +133,8 @@ const Game = () => {
         },
       )
 
-      console.log(res)
       reset()
+      Navigate('/')
     } catch (e) {
       console.log(e)
     }
@@ -135,17 +144,20 @@ const Game = () => {
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-10">
       <p>It's {turn} turn</p>
       <p>{message}</p>
-      <div className="flex items-center justify-center gap-3">
-        <p>Invite Code:{gameData?.inviteCode}</p>
-        <Link
-          className="bg-gray-600 px-3 py-2"
-          to={`whatsapp://send?text=${encodeURIComponent(
-            `https://chess.harshkeshri.com/game?invitecode=${gameData?.inviteCode}`,
-          )}`}
-        >
-          Send
-        </Link>
-      </div>
+      <p>Me vs {opponent}</p>
+      {!isFull && (
+        <div className="flex items-center justify-center gap-3">
+          <p>Invite Code:{gameData?.inviteCode}</p>
+          <Link
+            className="bg-gray-600 px-3 py-2"
+            to={`whatsapp://send?text=${encodeURIComponent(
+              `https://chess.harshkeshri.com/game?invitecode=${gameData?.inviteCode}`,
+            )}`}
+          >
+            Send
+          </Link>
+        </div>
+      )}
       <div className="flex flex-col items-center gap-2">
         <p>{type === 'w' ? 'White' : 'Black'}</p>
         <div

@@ -50,6 +50,7 @@ export const CreateGameHandler: RequestHandler = async (req, res) => {
       .create({
         players: [userData._id.toString()],
         whitePlayer: userData._id.toString(),
+        whitePlayerName: userData.name,
         blackPlayer: '',
         inviteCode,
         board: JSON.parse(
@@ -91,12 +92,16 @@ export const JoinGameHandler: RequestHandler = async (req, res) => {
     if (!gameData) return res.status(404).json({ message: 'Game not found' })
 
     if (gameData.players.includes(userData._id)) {
-      return res.status(201).json({ gameData })
+      return res.status(201).json(gameData)
     }
+
+    if (gameData.players.length === 2)
+      return res.status(409).json({ message: 'Game is full' })
 
     await GameModel.findByIdAndUpdate(gameData._id, {
       $addToSet: { players: userData._id },
       blackPlayer: userData._id,
+      blackPlayerName: userData.name,
     })
 
     await PlayerModel.findByIdAndUpdate(userData._id, {

@@ -34,6 +34,8 @@ interface GameContextProps {
   getLocation: (x: number, y: number) => string
   timerMessage: (message: string) => void
   reset: () => void
+  isFull: boolean
+  setIsFull: (isFull: boolean) => void
 }
 
 export const GameContext = createContext<GameContextProps>(null!)
@@ -64,8 +66,10 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
   const [selectedPiece, setSelectedPiece] = useState<SelectedPiece | null>()
   const [active, setActive] = useState<ActivePiece[]>([])
   const [killSuggestion, setKillSuggestion] = useState<ActivePiece[]>([])
+  const [isFull, setIsFull] = useState<boolean>(false)
 
   const setGameDataFn = (gameData: GameData) => {
+    console.log(gameData?.whitePlayer)
     setType(gameData?.whitePlayer === userData?._id ? 'w' : 'b')
     setGameData(gameData)
   }
@@ -168,7 +172,30 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
     }, 1000)
   }
 
-  const reset = () => {}
+  const reset = () => {
+    setBoard({
+      8: ['br1', 'bh1', 'bb1', 'bk1', 'bq1', 'bb2', 'bh2', 'br2'],
+      7: ['bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8'],
+      6: ['', '', '', '', '', '', '', ''],
+      5: ['', '', '', '', '', '', '', ''],
+      4: ['', '', '', '', '', '', '', ''],
+      3: ['', '', '', '', '', '', '', ''],
+      2: ['wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8'],
+      1: ['wr1', 'wh1', 'wb1', 'wk1', 'wq1', 'wb2', 'wh2', 'wr2'],
+    })
+    setSelectedPiece(null)
+    setActive([])
+    setKillSuggestion([])
+    setMessage('')
+    setMoves([])
+    setTurn('w')
+    setType(null)
+    setIsFull(false)
+  }
+
+  const isFullFn = (isFull: boolean) => {
+    setIsFull(isFull)
+  }
 
   return (
     <GameContext.Provider
@@ -197,6 +224,8 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
         getLocation,
         timerMessage,
         reset: reset,
+        isFull,
+        setIsFull: isFullFn,
       }}
     >
       {children}

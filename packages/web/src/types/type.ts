@@ -62,7 +62,7 @@ export type GameData = {
 export type Userdata = {
   _id: string
   email: string
-  username: string
+  name: string
   uid: string
   avatar: string
   games: string[]

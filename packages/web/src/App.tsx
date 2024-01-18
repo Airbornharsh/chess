@@ -6,8 +6,13 @@ import { UserAuthContext } from './context/AuthContext'
 function App() {
   const { user, logOut } = useContext(UserAuthContext)
 
-  const logOutFn = () => {
-    logOut()
+  const logOutFn = async () => {
+    try {
+      await logOut()
+      window.location.href = '/'
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return (
