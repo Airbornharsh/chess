@@ -1,4 +1,5 @@
 import { Board } from '../types/type'
+import Check from './Check'
 // import Check from './Check'
 
 export const MovePiece = async (
@@ -8,6 +9,8 @@ export const MovePiece = async (
   setTurn: (turn: 'w' | 'b') => void,
   board: Board,
   setBoard: (board: Board) => void,
+  check: boolean,
+  checkMate: boolean,
   selectedPiece: { x: number; y: number } | null,
   active: { x: number; y: number }[],
   killSuggestion: { x: number; y: number }[],
@@ -37,6 +40,23 @@ export const MovePiece = async (
   empty()
   setTurn(turn === 'w' ? 'b' : 'w')
   setBoard(newBoard)
+
+  const tempCheck = Check(turn, newBoard)
+  if (tempCheck.check && !tempCheck.checkMate) {
+    timerMessage('Try to save your king')
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = piece
+    newBoard[`${x}`][y] = killedPiece
+    setBoard(newBoard)
+    setTurn(tempTurn)
+    return
+  } else if (tempCheck.checkMate) {
+    timerMessage('Check Mate')
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = piece
+    newBoard[`${x}`][y] = killedPiece
+    setBoard(newBoard)
+    setTurn(tempTurn)
+    return
+  }
 
   const res = await moveUpdate(
     getLocation(selectedPiece.x, selectedPiece.y),
