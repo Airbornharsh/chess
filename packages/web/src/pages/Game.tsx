@@ -87,19 +87,16 @@ const Game = () => {
               }
               if (data.whitePlayer !== '' && data.blackPlayer !== '')
                 setIsFull(true)
-              const res = Check(type, board)
+              const res = Check(type, data.board)
               if (res.check && !res.checkMate) {
                 timerMessage('Check', false)
                 setCheck(true)
-              } else {
-                timerMessage('', true)
-                setCheck(false)
-              }
-              if (res.checkMate) {
+              } else if (res.checkMate) {
                 timerMessage('CheckMate', false)
                 setCheckMate(true)
               } else {
                 timerMessage('', true)
+                setCheck(false)
                 setCheckMate(false)
               }
             }

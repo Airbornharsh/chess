@@ -399,6 +399,8 @@ const Check = (
 
   if (kingCheckCount === 8) checkMate = true
 
+  console.log(check, checkMate)
+
   return {
     check,
     checkMate,
