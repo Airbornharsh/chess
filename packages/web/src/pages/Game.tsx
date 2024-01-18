@@ -38,13 +38,13 @@ const Game = () => {
 
   useEffect(() => {
     const onLoad = async () => {
-      console.log(location.search.split('?')[1].split('=')[1])
       try {
         const token = await user?.getIdToken()
-        const res = await axios.get(
-          `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/${
-            location.search.split('?')[1].split('=')[1]
-          }`,
+        const res = await axios.post(
+          `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/join`,
+          {
+            inviteCode: location.search.split('?')[1].split('=')[1],
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,

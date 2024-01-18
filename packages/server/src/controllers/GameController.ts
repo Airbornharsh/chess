@@ -118,30 +118,30 @@ export const JoinGameHandler: RequestHandler = async (req, res) => {
   }
 }
 
-export const GetGameHandler: RequestHandler = async (req, res) => {
-  try {
-    const { inviteCode } = req.params
+// export const GetGameHandler: RequestHandler = async (req, res) => {
+//   try {
+//     const { inviteCode } = req.params
 
-    const authPlayer = await res.locals.player
+//     const authPlayer = await res.locals.player
 
-    const userData = await PlayerModel.findOne({ uid: authPlayer.uid })
+//     const userData = await PlayerModel.findOne({ uid: authPlayer.uid })
 
-    if (!userData) return res.status(401).json({ message: 'Unauthorized' })
+//     if (!userData) return res.status(401).json({ message: 'Unauthorized' })
 
-    const gameData = await GameModel.findOne({
-      inviteCode,
-      $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
-      winner: null,
-      losser: null,
-    })
+//     const gameData = await GameModel.findOne({
+//       inviteCode,
+//       $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+//       winner: null,
+//       losser: null,
+//     })
 
-    if (!gameData) return res.status(404).json({ message: 'Game not found' })
+//     if (!gameData) return res.status(404).json({ message: 'Game not found' })
 
-    return res.status(200).json(gameData)
-  } catch (e: any) {
-    res.status(500).send(e.message)
-  }
-}
+//     return res.status(200).json(gameData)
+//   } catch (e: any) {
+//     res.status(500).send(e.message)
+//   }
+// }
 
 export const MovePieceHandler: RequestHandler = async (req, res) => {
   try {
