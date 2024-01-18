@@ -38,6 +38,7 @@ const Game = () => {
 
   useEffect(() => {
     const onLoad = async () => {
+      console.log(location.search.split('?')[1].split('=')[1])
       try {
         const token = await user?.getIdToken()
         const res = await axios.get(
@@ -139,7 +140,7 @@ const Game = () => {
         <Link
           className="bg-gray-600 px-3 py-2"
           to={`whatsapp://send?text=${encodeURIComponent(
-            `https://chess.harshkeshri.com/game/${gameData?.inviteCode}`,
+            `https://chess.harshkeshri.com/game?invitecode=${gameData?.inviteCode}`,
           )}`}
         >
           Send
