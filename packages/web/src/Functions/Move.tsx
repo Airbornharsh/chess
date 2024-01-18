@@ -9,8 +9,6 @@ export const MovePiece = async (
   setTurn: (turn: 'w' | 'b') => void,
   board: Board,
   setBoard: (board: Board) => void,
-  check: boolean,
-  checkMate: boolean,
   selectedPiece: { x: number; y: number } | null,
   active: { x: number; y: number }[],
   killSuggestion: { x: number; y: number }[],
