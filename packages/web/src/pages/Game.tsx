@@ -4,7 +4,7 @@ import onTap from '../Functions/Tap'
 import BoardPiece from '../components/BoardPiece'
 import useGameContext from '../context/GameContext'
 import axios from 'axios'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { UserAuthContext } from '../context/AuthContext'
 import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '../config/firebase'
@@ -33,6 +33,7 @@ const Game = () => {
     getLocation,
     empty,
     timerMessage,
+    reset,
   } = useGameContext()
 
   useEffect(() => {
@@ -123,7 +124,7 @@ const Game = () => {
       )
 
       console.log(res)
-      setGameData(res.data)
+      reset()
     } catch (e) {
       console.log(e)
     }
@@ -133,7 +134,17 @@ const Game = () => {
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-10">
       <p>It's {turn} turn</p>
       <p>{message}</p>
-      <p>Invite Code:{gameData?.inviteCode}</p>
+      <div className="flex items-center justify-center gap-3">
+        <p>Invite Code:{gameData?.inviteCode}</p>
+        <Link
+          className="bg-gray-600 px-3 py-2"
+          to={`whatsapp://send?text=${encodeURIComponent(
+            `https://chess.harshkeshri.com/game/${gameData?.inviteCode}`,
+          )}`}
+        >
+          Send
+        </Link>
+      </div>
       <div className="flex flex-col items-center gap-2">
         <p>{type === 'w' ? 'White' : 'Black'}</p>
         <div

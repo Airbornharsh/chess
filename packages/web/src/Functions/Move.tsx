@@ -1,8 +1,8 @@
 import { Board } from '../types/type'
 
-export const MovePiece = (
+export const MovePiece = async (
   type: 'w' | 'b',
-  moveUpdate: () => void,
+  moveUpdate: (from: string, to: string) => Promise<boolean>,
   turn: 'w' | 'b',
   setTurn: (turn: 'w' | 'b') => void,
   board: Board,
@@ -28,25 +28,40 @@ export const MovePiece = (
   }
   const newBoard = { ...board }
   const piece = newBoard[`${selectedPiece?.x}`][selectedPiece?.y]
+  const killedPiece = newBoard[`${x}`][y]
+  const tempTurn = turn
   if (!selectedPiece) return
-  if (active.find((a) => a.x === x && a.y === y))
-    timerMessage(
-      `Moved from ${getLocation(
-        selectedPiece.x,
-        selectedPiece.y,
-      )} to ${getLocation(x, y)}`,
-    )
-  else
-    timerMessage(
-      `Moved from ${getLocation(
-        selectedPiece.x,
-        selectedPiece.y,
-      )} to ${getLocation(x, y)} and Killed ${newBoard[`${x}`][y]}`,
-    )
   newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = ''
   newBoard[`${x}`][y] = piece
-  setBoard(newBoard)
   empty()
   setTurn(turn === 'w' ? 'b' : 'w')
-  moveUpdate()
+  setBoard(newBoard)
+
+  const res = await moveUpdate(
+    getLocation(selectedPiece.x, selectedPiece.y),
+    getLocation(x, y),
+  )
+  if (!res) {
+    newBoard[`${selectedPiece?.x}`][selectedPiece?.y] = piece
+    newBoard[`${x}`][y] = killedPiece
+    timerMessage('Need One More PLayer')
+    setBoard(newBoard)
+    setTurn(tempTurn)
+    return
+  } else {
+    if (active.find((a) => a.x === x && a.y === y))
+      timerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)}`,
+      )
+    else
+      timerMessage(
+        `Moved from ${getLocation(
+          selectedPiece.x,
+          selectedPiece.y,
+        )} to ${getLocation(x, y)} and Killed ${newBoard[`${x}`][y]}`,
+      )
+  }
 }

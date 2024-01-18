@@ -9,13 +9,10 @@ const moveSchema = new Schema({
     type: String,
     required: true,
   },
-  type: {
-    type: String,
+  index: {
+    type: Number,
     required: true,
-  },
-  color: {
-    type: String,
-    required: true,
+    default: 0,
   },
   previousMove: {
     type: Schema.Types.ObjectId,

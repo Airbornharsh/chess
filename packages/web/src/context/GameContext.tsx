@@ -12,7 +12,7 @@ import axios from 'axios'
 interface GameContextProps {
   gameData: GameData | null
   setGameData: (gameData: GameData) => void
-  moveUpdate: () => void
+  moveUpdate: (from: string, to: string) => Promise<boolean>
   type: PlayerColor | null
   setType: (color: PlayerColor) => void
   turn: PlayerColor
@@ -33,6 +33,7 @@ interface GameContextProps {
   empty: () => void
   getLocation: (x: number, y: number) => string
   timerMessage: (message: string) => void
+  reset: () => void
 }
 
 export const GameContext = createContext<GameContextProps>(null!)
@@ -69,13 +70,15 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
     setGameData(gameData)
   }
 
-  const moveUpdate = async () => {
+  const moveUpdate = async (from: string, to: string) => {
     try {
       const token = await user?.getIdToken()
       const res = await axios.post(
         `${import.meta.env.VITE_APP_BAKCEND_API_URL}user/game/move`,
         {
           board,
+          from,
+          to,
         },
         {
           headers: {
@@ -85,8 +88,10 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
       )
 
       console.log(res)
+      return true
     } catch (e) {
       console.log(e)
+      return false
     }
   }
 
@@ -163,6 +168,8 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
     }, 1000)
   }
 
+  const reset = () => {}
+
   return (
     <GameContext.Provider
       value={{
@@ -189,6 +196,7 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
         empty,
         getLocation,
         timerMessage,
+        reset: reset,
       }}
     >
       {children}

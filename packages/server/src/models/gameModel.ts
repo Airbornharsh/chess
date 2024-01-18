@@ -44,13 +44,11 @@ const GameSchema = new Schema({
       default: [],
     },
   ],
-  gameStates: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'GameState',
-      default: [],
-    },
-  ],
+  currentMove: {
+    type: Schema.Types.ObjectId,
+    ref: 'Move',
+    default: null,
+  },
   latestGameStateIndex: {
     type: Number,
     required: true,

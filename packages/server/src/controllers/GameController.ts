@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express'
 import GameModel from '../models/gameModel'
 import PlayerModel from '../models/playerModel'
-import GameStateModel from '../models/gameStateModel'
 import { firestore } from '../config/firebase'
+import MoveModel from '../models/moveModel'
 
 export const CreateGameHandler: RequestHandler = async (req, res) => {
   try {
@@ -36,32 +36,12 @@ export const CreateGameHandler: RequestHandler = async (req, res) => {
       whitePlayer: userData._id,
       status: 'waiting',
       inviteCode,
-      gameStates: [],
       moves: [],
       latestGameStateIndex: 0,
     })
 
-    const gameState = await GameStateModel.create({
-      index: 0,
-      gameId: newGame._id,
-      board: {
-        8: ['br1', 'bh1', 'bb1', 'bk1', 'bq1', 'bb2', 'bh2', 'br2'],
-        7: ['bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8'],
-        6: ['', '', '', '', '', '', '', ''],
-        5: ['', '', '', '', '', '', '', ''],
-        4: ['', '', '', '', '', '', '', ''],
-        3: ['', '', '', '', '', '', '', ''],
-        2: ['wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8'],
-        1: ['wr1', 'wh1', 'wb1', 'wk1', 'wq1', 'wb2', 'wh2', 'wr2'],
-      },
-    })
-
-    await GameModel.findByIdAndUpdate(newGame._id, {
-      $push: { gameStates: gameState._id },
-    })
-
     await PlayerModel.findByIdAndUpdate(userData._id, {
-      $push: { games: newGame._id },
+      $addToSet: { games: newGame._id },
     })
 
     await firestore
@@ -72,7 +52,18 @@ export const CreateGameHandler: RequestHandler = async (req, res) => {
         whitePlayer: userData._id.toString(),
         blackPlayer: '',
         inviteCode,
-        board: JSON.parse(JSON.stringify(gameState.board)),
+        board: JSON.parse(
+          JSON.stringify({
+            8: ['br1', 'bh1', 'bb1', 'bk1', 'bq1', 'bb2', 'bh2', 'br2'],
+            7: ['bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8'],
+            6: ['', '', '', '', '', '', '', ''],
+            5: ['', '', '', '', '', '', '', ''],
+            4: ['', '', '', '', '', '', '', ''],
+            3: ['', '', '', '', '', '', '', ''],
+            2: ['wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8'],
+            1: ['wr1', 'wh1', 'wb1', 'wk1', 'wq1', 'wb2', 'wh2', 'wr2'],
+          }),
+        ),
         createdAt: newGame.createdAt,
         turn: 'white',
       })
@@ -104,12 +95,12 @@ export const JoinGameHandler: RequestHandler = async (req, res) => {
     }
 
     await GameModel.findByIdAndUpdate(gameData._id, {
-      $push: { players: userData._id },
+      $addToSet: { players: userData._id },
       blackPlayer: userData._id,
     })
 
     await PlayerModel.findByIdAndUpdate(userData._id, {
-      $push: { games: gameData._id },
+      $addToSet: { games: gameData._id },
     })
 
     const docRef = firestore.collection('games').doc(gameData._id.toString())
@@ -160,6 +151,8 @@ export const MovePieceHandler: RequestHandler = async (req, res) => {
 
     if (!userData) return res.status(401).json({ message: 'Unauthorized' })
 
+    const { board, from, to } = req.body
+
     const gameData = await GameModel.findOne({
       $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
       winner: null,
@@ -168,13 +161,20 @@ export const MovePieceHandler: RequestHandler = async (req, res) => {
 
     if (!gameData) return res.status(404).json({ message: 'Game not found' })
 
-    await GameStateModel.create({
-      index: gameData.latestGameStateIndex + 1,
+    if (gameData.players.length !== 2)
+      return res.status(409).json({ message: 'Not enough players' })
+
+    const move = await MoveModel.create({
+      from: from,
+      to: to,
+      previousMove: gameData.currentMove,
       gameId: gameData._id,
-      board: req.body.board,
+      index: gameData.latestGameStateIndex + 1,
     })
 
     gameData.latestGameStateIndex += 1
+    gameData.currentMove = move._id
+    gameData.moves.push(move._id)
 
     await gameData.save()
 
@@ -183,7 +183,7 @@ export const MovePieceHandler: RequestHandler = async (req, res) => {
     const doc = await docRef.get()
 
     await docRef.update({
-      board: req.body.board,
+      board: board,
       turn: doc.data()?.turn === 'white' ? 'black' : 'white',
     })
 
