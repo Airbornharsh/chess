@@ -232,6 +232,8 @@ export const CancelGameHandler: RequestHandler = async (req, res) => {
 
     const gameData = await GameModel.findOne({
       $or: [{ whitePlayer: userData._id }, { blackPlayer: userData._id }],
+      winner: null,
+      losser: null,
     })
 
     if (!gameData) return res.status(404).json({ message: 'Not Found' })
@@ -240,6 +242,7 @@ export const CancelGameHandler: RequestHandler = async (req, res) => {
     gameData.winner = gameData.players.filter(
       (player) => player.toString() !== userData._id.toString(),
     )[0]
+
     await gameData.save()
 
     await firestore.collection('games').doc(gameData._id.toString()).delete()
