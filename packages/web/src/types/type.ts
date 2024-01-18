@@ -72,22 +72,26 @@ export type Userdata = {
   updatedAt: string
 }
 
-export const PiecesIcons = {
+export const PiecesIcons: {
+  [key: string]: {
+    [key: string]: string
+  }
+} = {
   w: {
-    pawn: '♙',
-    rook: '♖',
-    knight: '♘',
-    bishop: '♗',
-    queen: '♕',
-    king: '♔',
+    p: '♙',
+    r: '♖',
+    h: '♘',
+    b: '♗',
+    q: '♕',
+    k: '♔',
   },
   b: {
-    pawn: '♟︎',
-    rook: '♜',
-    knight: '♞',
-    bishop: '♝',
-    queen: '♛',
-    king: '♚',
+    p: '♟︎',
+    r: '♜',
+    h: '♞',
+    b: '♝',
+    q: '♛',
+    k: '♚',
   },
 }
 

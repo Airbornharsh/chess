@@ -1,4 +1,4 @@
-import { BoardPieceProps } from '../types/type'
+import { BoardPieceProps, PiecesIcons } from '../types/type'
 
 const BoardPiece: React.FC<BoardPieceProps> = ({
   type,
@@ -12,9 +12,14 @@ const BoardPiece: React.FC<BoardPieceProps> = ({
   killSuggestion,
   movePiece,
 }) => {
+  const getPiece = (piece: string) => {
+    if (piece.length !== 3) return
+    return PiecesIcons[piece[0]][piece[1]]
+  }
+
   return (
     <span
-      className="flex h-10 w-10 items-center justify-center"
+      className="flex h-10 w-10 items-center justify-center text-3xl"
       style={{
         backgroundColor: killSuggestion
           ? turn === type
@@ -45,7 +50,7 @@ const BoardPiece: React.FC<BoardPieceProps> = ({
         !selectedPiece ? () => setSelectedPieceFn(x, y) : () => movePiece(x, y)
       }
     >
-      {piece}
+      {getPiece(piece)}
     </span>
   )
 }
